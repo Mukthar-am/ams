@@ -6,19 +6,26 @@ import java.util.Scanner;
 
 /**
  * Created by mukthar.ahmed on 4/1/16.
- *
+ * <p>
  * - AmsClient (Ahmed's Chat client) implementation
  */
 public class AmsClient {
+    private String CLIENT_ID;
     private static final int AMS_SERVER_PORT = 6066;
     private static final String AMS_SERVER_NAME = "localhost";  //InetAddress.getLocalHost()
-    private static String TAG = "[Client]: ";
+    private static String TAG;
     private Socket CLIENT_SOCKET;
 
-    /** DataInputStrea to read server responses */
+    /**
+     * DataInputStrea to read server responses
+     */
     private InputStream inFromServer;
     private DataInputStream dataInputStream;
 
+    public AmsClient(String name) {
+        this.CLIENT_ID = name;
+        this.TAG = "[" + CLIENT_ID + "]: ";
+    }
 
     public AmsClient(String serverName, int port) throws IOException {
         CLIENT_SOCKET = new Socket(serverName, port);
@@ -68,6 +75,16 @@ public class AmsClient {
     }
 
 
+    public void startClient(String amsServerName, int amsPort) {
+        AmsClient client = null;
+        try {
+            client = new AmsClient(amsServerName, amsPort);
+            client.bridgeWithServer();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * main method to start with.
@@ -75,25 +92,16 @@ public class AmsClient {
      * @param args
      */
     public static void main(String[] args) {
-        AmsClient client = null;
+        String name = "Client # 1";
 
-        try {
-            if (args.length != 0) {
-                String serverName = args[0];
-                int port = Integer.parseInt(args[1]);
-                client = new AmsClient(serverName, port);
+        if (args.length != 0) {
+            String serverName = args[0];
+            int port = Integer.parseInt(args[1]);
+            new AmsClient(name).startClient(serverName, port);
 
-                client.bridgeWithServer();
+        } else {
+            new AmsClient(name).startClient(AMS_SERVER_NAME, AMS_SERVER_PORT);
 
-            } else {
-                client = new AmsClient(AMS_SERVER_NAME, AMS_SERVER_PORT);
-                client.bridgeWithServer();
-
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
     }
 }

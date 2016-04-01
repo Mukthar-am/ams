@@ -11,7 +11,7 @@ import java.net.SocketTimeoutException;
  * - Message exchange socket FROM_CLIENT_SOCKET
  */
 
-public class AmsMessageServer extends Thread implements MessagingServer {
+public class AmsMessageServer extends Thread {
     private ServerSocket SERVER_SOCKET;
     private int TIMEOUT = 20000;
     private Socket FROM_CLIENT_SOCKET;
@@ -74,17 +74,13 @@ public class AmsMessageServer extends Thread implements MessagingServer {
 
 
     /**
-     * Stop server: Set server-run-flag to false, so as to terminate server
+     * For stopping server from external source
      */
     public void stopServer() {
         SERVER_RUN_FLAG = false;
     }
 
-
-    /**
-     * Start Server: Just init the thread and start
-     */
-    public void startServer() {
+    public static void startServer() {
         try {
             Thread srvThread = new AmsMessageServer();
             srvThread.start();  /** starts the server thread */
@@ -94,7 +90,7 @@ public class AmsMessageServer extends Thread implements MessagingServer {
         }
     }
 
-    public void main(String[] args) {
-        this.startServer();
+    public static void main(String[] args) {
+        startServer();
     }
 }
