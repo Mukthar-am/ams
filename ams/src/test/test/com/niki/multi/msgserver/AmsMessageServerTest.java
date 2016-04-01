@@ -1,4 +1,4 @@
-package com.niki.msgserver;
+package com.niki.multi.msgserver;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
