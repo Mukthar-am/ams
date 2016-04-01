@@ -11,10 +11,12 @@ import java.net.SocketTimeoutException;
  * - Message exchange socket FROM_CLIENT_SOCKET
  */
 
-public class AmsMessageServer extends Thread {
+public class AmsMessageServer extends Thread implements MessagingServer {
     private ServerSocket SERVER_SOCKET;
     private int TIMEOUT = 20000;
     private Socket FROM_CLIENT_SOCKET;
+    private boolean SERVER_RUN_FLAG = true;
+
 
     /**
      * FROM_CLIENT_SOCKET constructor, establising socket connection
@@ -28,27 +30,25 @@ public class AmsMessageServer extends Thread {
 
 
     public void run() {
-        while (true) {
+        while (SERVER_RUN_FLAG) {
             try {
                 System.out.println("\n# Waiting for client on port " + SERVER_SOCKET.getLocalPort() + "...");
                 FROM_CLIENT_SOCKET = SERVER_SOCKET.accept();
 
                 System.out.println("# Successfully connected to " + FROM_CLIENT_SOCKET.getRemoteSocketAddress());
 
+                /** DatOutputStrea - To send server response */
                 DataOutputStream out = new DataOutputStream(FROM_CLIENT_SOCKET.getOutputStream());
                 out.writeUTF("# Thanks for connecting to " + FROM_CLIENT_SOCKET.getLocalSocketAddress());
                 out.flush();
 
-
-                /** PrintWriter pw - Object to print at stdout */
-                PrintWriter pw = new PrintWriter(FROM_CLIENT_SOCKET.getOutputStream(), true);
                 BufferedReader br = new BufferedReader(new InputStreamReader(FROM_CLIENT_SOCKET.getInputStream()));
                 String str;
                 while ((str = br.readLine()) != null) {
                     System.out.println("Incoming Message: " + str);
 
                     if (str.equals("bye")) {
-                        pw.println("bye");
+                        out.writeUTF(str);
                         break;
                     } else {
                         str = "Server Response: " + str;
@@ -57,8 +57,8 @@ public class AmsMessageServer extends Thread {
                 }
 
                 /** close the persistent connection if "bye" string is found */
-                pw.close();
                 br.close();
+                out.close();
                 FROM_CLIENT_SOCKET.close();
 
             } catch (SocketTimeoutException s) {
@@ -72,22 +72,29 @@ public class AmsMessageServer extends Thread {
         }
     }
 
-    public void closeSocketConnection() {
+
+    /**
+     * Stop server: Set server-run-flag to false, so as to terminate server
+     */
+    public void stopServer() {
+        SERVER_RUN_FLAG = false;
+    }
+
+
+    /**
+     * Start Server: Just init the thread and start
+     */
+    public void startServer() {
         try {
-            FROM_CLIENT_SOCKET.close();
+            Thread srvThread = new AmsMessageServer();
+            srvThread.start();  /** starts the server thread */
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-
-    public static void main(String[] args) {
-        try {
-            Thread t = new AmsMessageServer();
-            t.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+    public void main(String[] args) {
+        this.startServer();
     }
 }

@@ -6,8 +6,8 @@ import java.util.Scanner;
 
 /**
  * Created by mukthar.ahmed on 4/1/16.
- * <p>
- * - AmsClient implementation
+ *
+ * - AmsClient (Ahmed's Chat client) implementation
  */
 public class AmsClient {
     private static final int AMS_SERVER_PORT = 6066;
@@ -29,19 +29,10 @@ public class AmsClient {
         System.out.println(TAG + "[ Initialized(): Server Response - " + dataInputStream.readUTF() + " ]");
     }
 
-    public void getmain() throws Exception {
-        //CLIENT_SOCKET = new Socket(AMS_SERVER_NAME, AMS_SERVER_PORT);
-
+    public void bridgeWithServer() throws Exception {
 
         /** PrintWriter to write msgs to socket */
-        PrintWriter pw = new PrintWriter(CLIENT_SOCKET.getOutputStream(), true);
-
-//        /** DataInputStrea to read server responses */
-//        InputStream inFromServer = CLIENT_SOCKET.getInputStream();
-//        DataInputStream in = new DataInputStream(inFromServer);
-//
-//        System.out.println(TAG + "[ Initialized(): Server Response - " + in.readUTF() + " ]");
-
+        PrintWriter socketPrintWriter = new PrintWriter(CLIENT_SOCKET.getOutputStream(), true);
 
         /** close connection based on user input */
         Scanner scanner = new Scanner(System.in);
@@ -55,7 +46,7 @@ public class AmsClient {
 
             } else {
                 System.out.println(TAG + "# Msg = " + input);
-                pw.println(input);  /** Sending msg to server socket */
+                socketPrintWriter.println(input);  /** Sending msg to server socket */
 
                 if (input.equalsIgnoreCase("bye")) {
                     break;
@@ -69,85 +60,14 @@ public class AmsClient {
 
         }
 
-
+        /** Close all the connectin objects */
         System.out.println("# END: Closing connection.");
-        pw.close();
+        socketPrintWriter.close();
         CLIENT_SOCKET.close();
         scanner.close();
     }
 
 
-//
-//    private void sendMessage(String inMsg) {
-//        try {
-//            System.out.println(TAG + "Successfully connected to " + CLIENT_SOCKET.getRemoteSocketAddress());
-//
-//            OutputStream outToServer = CLIENT_SOCKET.getOutputStream();
-//            DataOutputStream out = new DataOutputStream(outToServer);
-//            out.writeUTF(TAG + " " + inMsg + " " + CLIENT_SOCKET.getLocalSocketAddress());
-//            out.writeUTF(inMsg);
-//
-//            InputStream inFromServer = CLIENT_SOCKET.getInputStream();
-//            DataInputStream dataInputStream = new DataInputStream(inFromServer);
-//            System.out.println(TAG + "Server response: [" + dataInputStream.readUTF() + "]");
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//
-//    private void establishConnection(String serverName, int serverPort) {
-//        this.getConnection(serverName, serverPort);
-//
-//        /** close connection based on user input */
-//        Scanner scanner = new Scanner(System.dataInputStream);
-//        while (true) {
-//            System.out.println("\nMenu Options:");
-//            System.out.println("(1) Close server connection. " +
-//                "(2) Send message. " +
-//                "(3) Quit client");
-//            scanner.useDelimiter("\\n");
-//
-//            String input = scanner.nextLine();
-//            if (input.isEmpty()) {
-//                System.out.println("# Invalid input.");
-//
-//            } else {
-//                int option = Integer.parseInt(input);
-//                System.out.println("= You have entered: " + option);
-//
-//                System.out.println("Your answer is = " + option);
-//                switch (option) {
-//                    case 1:             /** Closing client connection */
-//                        try {
-//                            CLIENT_SOCKET.close();
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//                        System.out.printf("Closed client connection.");
-//                        break;
-//
-//                    case 2:             /** Sending message */
-//                        System.out.println("\nWhat's your message ?\n");
-//                        String msg = scanner.nextLine();
-//                        System.out.println("+ Your msg is: " + msg);
-//
-//                        sendMessage(msg);   /** Send server socket messages */
-//
-//                        break;
-//
-//                    case 3:
-//                        scanner.close();
-//
-//                    default:
-//                        System.out.println("No options selected, please see menu options.");
-//                }
-//            }
-//
-//        }
-//
-//    }
 
     /**
      * main method to start with.
@@ -155,7 +75,7 @@ public class AmsClient {
      * @param args
      */
     public static void main(String[] args) {
-        AmsClient client;
+        AmsClient client = null;
 
         try {
             if (args.length != 0) {
@@ -163,14 +83,17 @@ public class AmsClient {
                 int port = Integer.parseInt(args[1]);
                 client = new AmsClient(serverName, port);
 
-            } else {
+                client.bridgeWithServer();
 
+            } else {
                 client = new AmsClient(AMS_SERVER_NAME, AMS_SERVER_PORT);
+                client.bridgeWithServer();
 
             }
-        } catch (IOException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
-    }
 
+    }
 }
