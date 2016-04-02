@@ -107,5 +107,9 @@ public class ChatClientThread extends Thread {
     public static void main(String[] args) {
         Thread t1 = new ChatClientThread("client-1");
         t1.start();
+
+        Thread t2 = new ChatClientThread("client-2");
+        t2.start();
+
     }
 }
