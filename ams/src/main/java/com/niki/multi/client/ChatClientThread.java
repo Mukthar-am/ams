@@ -14,6 +14,9 @@ import java.util.concurrent.*;
 
 /**
  * Created by mukthar.ahmed on 4/2/16.
+ *
+ *  -   Chat client, extending thread. Can instantiate n no. of chat clients.
+ *
  */
 public class ChatClientThread extends Thread {
 
@@ -102,9 +105,6 @@ public class ChatClientThread extends Thread {
 
     }
 
-    public void shutDown() {
-        this.ThreadRunFlag = false;
-    }
 
     private String getChatUserName() {
         return JOptionPane.showInputDialog(
