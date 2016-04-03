@@ -1,10 +1,6 @@
 package com.niki.multi.client;
 
-import com.sun.javafx.tk.*;
-import com.sun.javafx.tk.Toolkit;
-
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
@@ -18,7 +14,7 @@ import java.util.concurrent.*;
  *  -   Chat client, extending thread. Can instantiate n no. of chat clients.
  *
  */
-public class ChatClientThread extends Thread {
+public class ChatClient extends Thread {
 
     private String user = "";
     private BufferedReader in;
@@ -28,9 +24,19 @@ public class ChatClientThread extends Thread {
     private JTextArea messageArea = new JTextArea(8, 40);
 
     private boolean ThreadRunFlag = true;
+    private String HOSTNAME;
+    private int PORT;
 
-    public ChatClientThread(String name) {
+    /**
+     * Thread run constructor
+     * @param name
+     * @param srvHostName
+     * @param srvPort
+     */
+    public ChatClient(String name, String srvHostName, int srvPort) {
         super(name);
+        this.HOSTNAME = srvHostName;
+        this.PORT = srvPort;
 
         // Layout GUI
         frame = new JFrame(name);
@@ -58,6 +64,9 @@ public class ChatClientThread extends Thread {
 
     }
 
+    /**
+     * Thread run class
+     */
     public void run() {
         while (ThreadRunFlag) {
             System.out.println("+ Started the client thread...");
@@ -66,7 +75,7 @@ public class ChatClientThread extends Thread {
             // Process all messages from server, according to the protocol.
             String srvResp = null;
             try {
-                Socket socket = new Socket(serverAddress, 6061);
+                Socket socket = new Socket(HOSTNAME, PORT);
                 out = new PrintWriter(socket.getOutputStream(), true);
 
                 DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
@@ -105,7 +114,10 @@ public class ChatClientThread extends Thread {
 
     }
 
-
+    /**
+     * Accept chat user name
+     * @return
+     */
     private String getChatUserName() {
         return JOptionPane.showInputDialog(
             frame,
@@ -114,17 +126,40 @@ public class ChatClientThread extends Thread {
             JOptionPane.PLAIN_MESSAGE);
     }
 
+    /**
+     * Popup bye-bye dialog box
+     * @param msg
+     */
     private void showByeDialog(String msg) {
         JOptionPane.showMessageDialog(frame, msg);
     }
 
-    public static void main(String[] args) {
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
+    /**
+     *  Parse cli args and instantiate chat clients
+     * @param args
+     */
+    private static void parseCLI(String[] args) {
+        String hostname = "localhost";
+        int port = 6061;
 
-        Thread t1 = new ChatClientThread("client-1");
-        Thread t2 = new ChatClientThread("client-2");
+        if (args.length == 0) {
+            System.out.println("# USAGE: ARGS # 1=[\"<MsgServer-HostName>\" or \"default\"] ARGS # 2=6061" +
+                "\nEg: localhost 6061");
+            System.exit(-1);
+        }
 
+        if (args.length == 1 & args[0].equalsIgnoreCase("default")) {
+            System.out.println("# Will be using default configurations of messaging server.");
+        }
+        else if (args.length == 2) {
+            hostname = args[0];
+            port = Integer.parseInt(args[1]);
+        }
 
+        System.out.println("# Using, HostName=" + hostname + ", Port="+ port);
+
+        Thread t1 = new ChatClient("client-1", hostname, port);
+        Thread t2 = new ChatClient("client-2", hostname, port);
         t1.start();
         t2.start();
 
@@ -134,7 +169,15 @@ public class ChatClientThread extends Thread {
                 System.exit(0);
             }
         }
-
-
     }
-}
+
+
+    /**
+     * main method to start with.
+     * @param args
+     */
+    public static void main(String[] args) {
+        parseCLI(args); /** Parse and handle instantiating clients */
+    }
+
+}   // end class

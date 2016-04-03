@@ -12,13 +12,31 @@ import java.util.HashSet;
  * - Messaging server code, thread type implementation
  */
 public class AmsMultiClientServer {
-
-    private static final int PORT = 6061;
+    private static int PORT = 6061;
     private static HashSet<String> names = new HashSet<>();
     private static HashSet<DataOutputStream> writers = new HashSet<>();
 
+    /**
+     * main method to start with.
+     * @param args
+     */
     public static void main(String[] args) throws Exception {
         System.out.println("The chat server is running.");
+        if (args.length == 0) {
+            System.out.println("# USAGE: ARGS # 1=[6061 or <port>]" +
+                "\nEg: <java-class> 6061");
+            System.exit(-1);
+        }
+        else if (args.length == 1 & args[0].equalsIgnoreCase("default")) {
+            System.out.println("# Will be using default configurations of messaging server.");
+
+        }
+        else if ( args.length == 1 & !args[0].equalsIgnoreCase("default") ) {
+            PORT = Integer.parseInt(args[0]);
+        }
+
+
+        /** Start a new thread for every connection request */
         ServerSocket listener = new ServerSocket(PORT);
         try {
             while (true) {
